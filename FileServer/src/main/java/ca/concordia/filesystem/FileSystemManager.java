@@ -39,6 +39,7 @@ public class FileSystemManager {
         }
     }
 
+
     public void createFile(String fileName) throws Exception {
         globalLock.lock();
         try {
@@ -78,6 +79,39 @@ public class FileSystemManager {
             globalLock.unlock();
         }
     }
+
+    public void deleteFile(String fileName) throws Exception {
+        globalLock.lock();
+        try {
+            int inodeIndex = -1;
+
+            //  Find the file
+            for (int i = 0; i < inodeTable.length; i++) {
+                FEntry entry = inodeTable[i];
+                if (entry != null && entry.getFilename().equals(fileName)) {
+                    inodeIndex = i;
+                    break;
+                }
+            }
+
+            if (inodeIndex == -1) {
+                throw new Exception("File not found.");
+            }
+
+            //  Free the data block
+            short block = inodeTable[inodeIndex].getFirstBlock();
+            freeBlockList[block] = true;
+
+            //  Remove the inode entry
+            inodeTable[inodeIndex] = null;
+
+            System.out.println("File deleted: " + fileName);
+
+        } finally {
+            globalLock.unlock();
+        }
+    }
+
 
     // TODO: Add readFile, writeFile and other required methods,
 }
