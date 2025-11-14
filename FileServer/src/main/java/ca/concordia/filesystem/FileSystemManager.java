@@ -139,38 +139,35 @@ public class FileSystemManager {
     }
 
     public void deleteFile(String fileName) throws Exception {
-        globalLock.lock();
-        try {
-            int inodeIndex = -1;
 
-            //  Find the file
-            for (int i = 0; i < inodeTable.length; i++) {
-                FEntry entry = inodeTable[i];
-                if (entry != null && entry.getFilename().equals(fileName)) {
-                    inodeIndex = i;
-                    break;
+   globalLock.lock();
+         try {
+                //  Locate the file's inode
+                int idx = findFileIndex(fileName);
+                if (idx == -1) {
+                    throw new Exception("File not found.");
                 }
+
+                //  Free every block in the chain
+                FEntry entry = inodeTable[idx];
+                short first = entry.getFirstBlock();
+
+                if (first >= 0) {
+                    freeBlockChain(first);
+                }
+
+                // Remove the inode
+                inodeTable[idx] = null;
+
+                System.out.println("File deleted: " + fileName);
+
+            } finally {
+                globalLock.unlock();
             }
+     }
 
-            if (inodeIndex == -1) {
-                throw new Exception("File not found.");
-            }
 
-            //  Free the data block
-            short block = inodeTable[inodeIndex].getFirstBlock();
-            freeBlockList[block] = true;
-
-            //  Remove the inode entry
-            inodeTable[inodeIndex] = null;
-
-            System.out.println("File deleted: " + fileName);
-
-        } finally {
-            globalLock.unlock();
-        }
-    }
-
-    // Write data to file
+        // Write data to file
     public void writeFile(String fileName, byte[] data) throws Exception {
         globalLock.lock();
         try {
