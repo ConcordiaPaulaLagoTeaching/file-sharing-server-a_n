@@ -92,7 +92,7 @@ public class FileSystemManager {
         }
     }
 
-
+// TODO: Add readFile, writeFile and other required methods
 
     public void createFile(String fileName) throws Exception {
         globalLock.lock();
@@ -297,8 +297,6 @@ public class FileSystemManager {
 
 
 
-
-    // TODO: Add readFile, writeFile and other required methods,
 
 
 }

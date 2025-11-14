@@ -43,6 +43,39 @@ public class FileServer {
                                 writer.flush();
                                 break;
                             //TODO: Implement other commands READ, WRITE, DELETE, LIST
+
+                            case "DELETE":
+                                fsManager.deleteFile(parts[1]);
+                                writer.println("SUCCESS: File '" + parts[1] + "' deleted.");
+                                writer.flush();
+                                break;
+
+                            case "WRITE":
+                                // WRITE filename data
+                                String fileName = parts[1];
+                                String content = line.substring(command.length() + fileName.length() + 2);
+                                fsManager.writeFile(fileName, content.getBytes());
+                                writer.println("SUCCESS: Wrote to '" + fileName + "'.");
+                                writer.flush();
+                                break;
+
+                            case "READ":
+                                byte[] bytes = fsManager.readFile(parts[1]);
+                                writer.println("SUCCESS: Read from '" + parts[1] + "'.");
+                                writer.println(new String(bytes));
+                                writer.flush();
+                                break;
+
+                            case "LIST":
+                                writer.println("SUCCESS: Listing files.");
+                                String[] files = fsManager.listFiles();
+                                for (String f : files) {
+                                    writer.println(f);
+                                }
+                                writer.println("END");
+                                writer.flush();
+                                break;
+
                             case "QUIT":
                                 writer.println("SUCCESS: Disconnecting.");
                                 return;
